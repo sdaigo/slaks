@@ -1,6 +1,6 @@
 defmodule SlaksWeb.ChatRoomLive do
   use SlaksWeb, :live_view
-  alias Slaks.Repo
+  alias Slaks.Chat
   alias Slaks.Chat.Room
 
   @spec render(any()) :: Phoenix.LiveView.Rendered.t()
@@ -68,15 +68,15 @@ defmodule SlaksWeb.ChatRoomLive do
 
   # opens websocket connection, performs initialization to first render the page
   def mount(_params, _session, socket) do
-    rooms = Repo.all(Room)
+    rooms = Chat.list_rooms()
     {:ok, assign(socket, rooms: rooms)}
   end
 
   def handle_params(params, _session, socket) do
     room =
       case Map.fetch(params, "id") do
-        {:ok, id} -> Repo.get!(Room, id)
-        :error -> List.first(socket.assigns.rooms)
+        {:ok, id} -> Chat.get_room!(id)
+        :error -> Chat.get_first_room!()
       end
 
     {:noreply, assign(socket, hide_topic?: false, room: room)}
