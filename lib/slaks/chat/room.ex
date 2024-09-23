@@ -19,5 +19,7 @@ defmodule Slaks.Chat.Room do
       message: "can only contain lowercase letters, numbers and dashes"
     )
     |> validate_length(:topic, max: 200)
+    |> unsafe_validate_unique(:name, Slaks.Repo)
+    |> unique_constraint(:name)
   end
 end
