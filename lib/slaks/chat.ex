@@ -5,6 +5,18 @@ defmodule Slaks.Chat do
 
   import Ecto.Query
 
+  def create_room(attrs) do
+    %Room{}
+    |> Room.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_room(%Room{} = room, attrs) do
+    room
+    |> Room.changeset(attrs)
+    |> Repo.update()
+  end
+
   def get_first_room! do
     Repo.one!(from r in Room, limit: 1, order_by: [asc: :name])
   end
