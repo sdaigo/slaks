@@ -1,6 +1,6 @@
 # Chat Context
 defmodule Slaks.Chat do
-  alias Slaks.Chat.Room
+  alias Slaks.Chat.{Message, Room}
   alias Slaks.Repo
 
   import Ecto.Query
@@ -31,5 +31,13 @@ defmodule Slaks.Chat do
 
   def list_rooms do
     Repo.all(from r in Room, order_by: [asc: :name])
+  end
+
+  def list_messages_in_room(%Room{id: room_id}) do
+    from(m in Message,
+      where: m.room_id == ^room_id,
+      order_by: [asc: :inserted_at, asc: :id]
+    )
+    |> Repo.all()
   end
 end
