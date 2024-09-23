@@ -3,6 +3,52 @@ defmodule SlaksWeb.ChatRoomLive do
   alias Slaks.Chat
   alias Slaks.Chat.Room
 
+  # opens websocket connection, performs initialization to first render the page
+  def mount(_params, _session, socket) do
+    rooms = Chat.list_rooms()
+    {:ok, assign(socket, rooms: rooms)}
+  end
+
+  def handle_params(params, _session, socket) do
+    room =
+      case Map.fetch(params, "id") do
+        {:ok, id} -> Chat.get_room!(id)
+        :error -> Chat.get_first_room!()
+      end
+
+    {:noreply,
+     assign(
+       socket,
+       hide_topic?: false,
+       page_title: "#" <> room.name,
+       room: room
+     )}
+  end
+
+  def handle_event("toggle-topic", _params, socket) do
+    {:noreply, update(socket, :hide_topic?, &(!&1))}
+  end
+
+  defp room_link(assigns) do
+    ~H"""
+    <.link
+      class={[
+        "flex items-center h-8 text-sm pl-8 pr-3",
+        (@active && "bg-slate-300") || "hover:bg-slate-300"
+      ]}
+      patch={~p"/rooms/#{@room}"}
+    >
+      <.icon name="hero-hashtag" class="h-4 w-4" />
+      <span class={["ml-2 leading-note", @active && "font-bold"]}>
+        <%= @room.name %>
+      </span>
+    </.link>
+    """
+  end
+
+  attr :active, :boolean, required: true
+  attr :room, Room, required: true
+
   @spec render(any()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
@@ -51,51 +97,5 @@ defmodule SlaksWeb.ChatRoomLive do
       </div>
     </div>
     """
-  end
-
-  attr :active, :boolean, required: true
-  attr :room, Room, required: true
-
-  defp room_link(assigns) do
-    ~H"""
-    <.link
-      class={[
-        "flex items-center h-8 text-sm pl-8 pr-3",
-        (@active && "bg-slate-300") || "hover:bg-slate-300"
-      ]}
-      patch={~p"/rooms/#{@room}"}
-    >
-      <.icon name="hero-hashtag" class="h-4 w-4" />
-      <span class={["ml-2 leading-note", @active && "font-bold"]}>
-        <%= @room.name %>
-      </span>
-    </.link>
-    """
-  end
-
-  # opens websocket connection, performs initialization to first render the page
-  def mount(_params, _session, socket) do
-    rooms = Chat.list_rooms()
-    {:ok, assign(socket, rooms: rooms)}
-  end
-
-  def handle_params(params, _session, socket) do
-    room =
-      case Map.fetch(params, "id") do
-        {:ok, id} -> Chat.get_room!(id)
-        :error -> Chat.get_first_room!()
-      end
-
-    {:noreply,
-     assign(
-       socket,
-       hide_topic?: false,
-       page_title: "#" <> room.name,
-       room: room
-     )}
-  end
-
-  def handle_event("toggle-topic", _params, socket) do
-    {:noreply, update(socket, :hide_topic?, &(!&1))}
   end
 end
