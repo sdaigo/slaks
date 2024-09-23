@@ -56,7 +56,7 @@ defmodule SlaksWeb.ChatRoomLive do
         "flex items-center h-8 text-sm pl-8 pr-3",
         (@active && "bg-slate-300") || "hover:bg-slate-300"
       ]}
-      href="#"
+      href={~p"/rooms/#{@room.id}"}
     >
       <.icon name="hero-hashtag" class="h-4 w-4" />
       <span class={["ml-2 leading-note", @active && "font-bold"]}>
@@ -67,9 +67,14 @@ defmodule SlaksWeb.ChatRoomLive do
   end
 
   # opens websocket connection, performs initialization to first render the page
-  def mount(_params, _session, socket) do
-    rooms = Room |> Repo.all()
-    room = List.first(rooms)
+  def mount(params, _session, socket) do
+    rooms = Repo.all(Room)
+
+    room =
+      case Map.fetch(params, "id") do
+        {:ok, id} -> Repo.get!(Room, id)
+        :error -> List.first(rooms)
+      end
 
     {:ok, assign(socket, hide_topic?: false, room: room, rooms: rooms)}
   end

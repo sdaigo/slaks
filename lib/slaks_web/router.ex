@@ -17,9 +17,9 @@ defmodule SlaksWeb.Router do
   scope "/", SlaksWeb do
     pipe_through :browser
 
-    # get "/", PageController, :home
     # map to LiveView
     live "/", ChatRoomLive
+    live "/rooms/:id", ChatRoomLive
   end
 
   # Other scopes may use custom stacks.
