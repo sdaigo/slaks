@@ -20,6 +20,7 @@ defmodule SlaksWeb.Router do
     # map to LiveView
     live "/", ChatRoomLive
     live "/rooms/:id", ChatRoomLive
+    live "/rooms/:id/edit", ChatRoomLive.Edit
   end
 
   # Other scopes may use custom stacks.
